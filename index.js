@@ -36,7 +36,7 @@ const getFirstMessagingEntry = (body) => {
 
 //cb = callback
 
-var sessions = {};
+let sessions = {};
 const findOrCreateSession = (sessions, fbid, cb) => {
 
     if (!sessions[fbid]) {
@@ -72,6 +72,9 @@ app.get('/', (req, res) => {
     }
 });
 
+let intent = "";
+let entityCuisine = "";
+
 // Message handler
 app.post('/', (req, res) => {
     // Parsing the Messenger API response
@@ -87,6 +90,13 @@ app.post('/', (req, res) => {
         // We retrieve the Facebook user ID of the sender
         const sender = messaging.sender.id;
         console.log(sender);
+
+        //For calling wit actions, we need the properties of the msg object
+        Object.prototype.hasOwnProperty = function(property) {
+            return this[property] !== undefined;
+        };
+
+
         // We retrieve the user's current session, or create one if it doesn't exist
         // This is needed for our bot to figure out the conversation history
         findOrCreateSession(sessions, sender, (sessions, sessionId) => {
@@ -99,13 +109,19 @@ app.post('/', (req, res) => {
                             //POSTBACK
                             const postback = messaging.postback;
 
-                            if (postback) {
+                            if (postback.payload === "search" || postback.payload === "GET_STARTED_PAYLOAD") {
+                                FB.sendText(
+                                    sender,
+                                    "What kind of recipe do you search for? What cuisine? For example: african, chinese, japanese, korean, vietnamese, thai, indian, british, irish, french, italian, mexican, spanish, middle eastern, jewish, american, cajun, southern, greek, german, nordic, eastern european, caribbean, or latin american.\""
+                                );
+                            } else {
                                 var context = sessions[sessionId].context;
                                 FB.handlePostback(sessionId, context, postback.payload, (context) => {
                                     callback(null, context);
                                     console.log("Context:" + context);
                                 });
                             }
+
                             } else {
                             callback(null, {});
                         }
@@ -114,7 +130,7 @@ app.post('/', (req, res) => {
                         if (messaging.message) {
                             //MESSAGE
 
-                            const msg = messaging.message.text;
+                            const msg = messaging;
                             const atts = messaging.message.attachments;
                             console.log("Msg:" + msg);
                             if (atts) {
@@ -123,7 +139,7 @@ app.post('/', (req, res) => {
                                 // Let's reply with an automatic message
                                 FB.sendText(
                                     sender,
-                                    'Sorry I can only process text messages for now.'
+                                    msg
                                 );
                                 callback(null, {});
 
@@ -139,8 +155,6 @@ app.post('/', (req, res) => {
                                     sessionId, // the user's current session
                                     msg, // the user's message
                                     sessions[sessionId].context, // the user's current session state
-                                    actions.say(sender, context, msg),
-                                    actions.foodAPIRecipeRequest(sender, context, msg,
                                     (error, context) => {
                                         if (error) {
                                             console.log('Oops! Got an error from Wit:', error);
@@ -152,8 +166,28 @@ app.post('/', (req, res) => {
                                             // Our bot did everything it has to do.
                                             // Now it's waiting for further messages to proceed.
                                             console.log('Waiting for further messages.');
+                                            console.log("Sender, Context, Msg" + sender + context + msg.message.text);
+
+                                            //We retrieve the intent
 
 
+
+                                            if (msg.message.nlp.entities.hasOwnProperty('intent') === true) {
+                                                console.log('has intent!');
+                                                intent = msg.message.nlp.entities.intent[0].value;
+                                            } else {
+                                                console.log('has no intent!');
+                                            }
+
+                                            if (intent === "recipe" && msg.message.nlp.entities.hasOwnProperty('cuisine') !== true) {
+                                                actions.say(sender, context, "What kind of recipe do you search for? What cuisine? For example: african, chinese, japanese, korean, vietnamese, thai, indian, british, irish, french, italian, mexican, spanish, middle eastern, jewish, american, cajun, southern, greek, german, nordic, eastern european, caribbean, or latin american.\"")
+                                            }
+
+                                            if (msg.message.nlp.entities.hasOwnProperty('cuisine') === true) {
+                                                actions.foodAPIRecipeRequest(sender, context, msg);
+                                            } else {
+                                                console.log('has no cuisine!');
+                                            }
 
                                             // Based on the session state, you might want to reset the session.
                                             // This depends heavily on the business logic of your bot.
@@ -165,7 +199,7 @@ app.post('/', (req, res) => {
                                             // Updating the user's current session state
                                             callback(null, context);
                                         }
-                                    })
+                                    }
                                 )
                             }
                         } else {
