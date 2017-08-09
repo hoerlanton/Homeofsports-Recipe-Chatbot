@@ -1,0 +1,32 @@
+{
+  "name": "WitAI-FB-Messenger-boilerplate",
+  "version": "1.0.0",
+  "description": "NodeJS Boilerplate to connect Wit.ai and Facebook Messenger",
+  "keywords": [
+    "wit",
+    "wit.ai",
+    "bot",
+    "botengine",
+    "bots",
+    "Facebook",
+    "Messenger"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "setWelcome": "node setWelcome.js"
+  },
+  "repository": "https://github.com/JakobReiter/WitAI-Facebook-Messenger-chatbot-boilerplate",
+  "author": "Jakob Reiter <jakob.reiter.io@gmail.com>",
+  "dependencies": {
+    "async": "^2.0.0-rc.5",
+    "body-parser": "^1.15.1",
+    "express": "^4.15.4",
+    "node-fetch": "^1.5.1",
+    "node-uuid": "^1.4.7",
+    "node-wit": "^3.3.0",
+    "request": "^2.71.0",
+    "unirest": "^0.5.1"
+  }
+}
