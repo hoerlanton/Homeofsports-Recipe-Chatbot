@@ -52,7 +52,7 @@ module.exports = {
      */
     sendText(recipientId, msg, cb){
 
-        if (msg.length > 320) msg = msg.substr(0, 320);
+        if (msg > 320) msg = msg.substr(0, 320);
 
         const opts = {
             form: {

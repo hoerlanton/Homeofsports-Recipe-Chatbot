@@ -62,9 +62,7 @@ module.exports = {
 
     /**** Add your own functions HERE ******/
 
-    'null': (sessionId, context, cb) => {
-        console.log('null called: sessionId' + sessionId + "context" + context);
-        cb();
+    'null': ({sessionId, context, text, entities}) => {
         return Promise.resolve();
     },
 

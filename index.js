@@ -21,7 +21,7 @@ if (!config.FB_PAGE_TOKEN) {
 // See the Webhook reference
 // https://developers.facebook.com/docs/messenger-platform/webhook-reference
 const getFirstMessagingEntry = (body) => {
-    const val = body.object == 'page' &&
+    const val = body.object === 'page' &&
             body.entry &&
             Array.isArray(body.entry) &&
             body.entry.length > 0 &&
@@ -115,7 +115,7 @@ app.post('/', (req, res) => {
                                     "What kind of recipe do you search for? What cuisine? For example: african, chinese, japanese, korean, vietnamese, thai, indian, british, irish, french, italian, mexican, spanish, middle eastern, jewish, american, cajun, southern, greek, german, nordic, eastern european, caribbean, or latin american.\""
                                 );
                             } else {
-                                var context = sessions[sessionId].context;
+                                let context = sessions[sessionId].context;
                                 FB.handlePostback(sessionId, context, postback.payload, (context) => {
                                     callback(null, context);
                                     console.log("Context:" + context);
@@ -130,7 +130,7 @@ app.post('/', (req, res) => {
                         if (messaging.message) {
                             //MESSAGE
 
-                            const msg = messaging;
+                            const msg = messaging.message.text;
                             const atts = messaging.message.attachments;
                             console.log("Msg:" + msg);
                             if (atts) {
@@ -144,7 +144,7 @@ app.post('/', (req, res) => {
                                 callback(null, {});
 
                             } else {
-                                var context = sessions[sessionId].context;
+                                let context = sessions[sessionId].context;
                                 console.log("Run wit with context", sessions[sessionId].context);
                                 console.log("Ola: " + JSON.stringify(context));
                                 console.log("Recipient ID: " + recipientId);
@@ -166,24 +166,22 @@ app.post('/', (req, res) => {
                                             // Our bot did everything it has to do.
                                             // Now it's waiting for further messages to proceed.
                                             console.log('Waiting for further messages.');
-                                            console.log("Sender, Context, Msg" + sender + context + msg.message.text);
+                                            console.log("Sender, Context, Msg" + sender + context + msg);
 
                                             //We retrieve the intent
 
-
-
-                                            if (msg.message.nlp.entities.hasOwnProperty('intent') === true) {
+                                            if (messaging.message.nlp.entities.hasOwnProperty('intent') === true) {
                                                 console.log('has intent!');
-                                                intent = msg.message.nlp.entities.intent[0].value;
+                                                intent = messaging.message.nlp.entities.intent[0].value;
                                             } else {
                                                 console.log('has no intent!');
                                             }
 
-                                            if (intent === "recipe" && msg.message.nlp.entities.hasOwnProperty('cuisine') !== true) {
+                                            if (intent === "recipe" && messaging.message.nlp.entities.hasOwnProperty('cuisine') !== true) {
                                                 actions.say(sender, context, "What kind of recipe do you search for? What cuisine? For example: african, chinese, japanese, korean, vietnamese, thai, indian, british, irish, french, italian, mexican, spanish, middle eastern, jewish, american, cajun, southern, greek, german, nordic, eastern european, caribbean, or latin american.\"")
                                             }
 
-                                            if (msg.message.nlp.entities.hasOwnProperty('cuisine') === true) {
+                                            if (messaging.message.nlp.entities.hasOwnProperty('cuisine') === true) {
                                                 actions.foodAPIRecipeRequest(sender, context, msg);
                                             } else {
                                                 console.log('has no cuisine!');
