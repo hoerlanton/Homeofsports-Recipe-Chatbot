@@ -132,6 +132,7 @@ app.post('/', (req, res) => {
 
                             const msg = messaging.message.text;
                             const atts = messaging.message.attachments;
+
                             console.log("Msg:" + msg);
                             if (atts) {
                                 // We received an attachment
@@ -162,31 +163,30 @@ app.post('/', (req, res) => {
                                             //   console.log('Waiting for further messages.');
                                             callback(null, context);
                                             // }
-                                        } else {
+                                        } if (null) {
                                             // Our bot did everything it has to do.
                                             // Now it's waiting for further messages to proceed.
                                             console.log('Waiting for further messages.');
                                             console.log("Sender, Context, Msg" + sender + context + msg);
 
                                             //We retrieve the intent
+                                                console.log("Messaging: " + JSON.stringify(messaging));
+                                                if (messaging.message.nlp.entities.hasOwnProperty('intent') === true) {
+                                                    console.log('has intent!');
+                                                    intent = messaging.message.nlp.entities.intent[0].value;
+                                                } else {
+                                                    console.log('has no intent!');
+                                                }
 
-                                            if (messaging.message.nlp.entities.hasOwnProperty('intent') === true) {
-                                                console.log('has intent!');
-                                                intent = messaging.message.nlp.entities.intent[0].value;
-                                            } else {
-                                                console.log('has no intent!');
-                                            }
+                                                if (intent === "recipe" && messaging.message.nlp.entities.hasOwnProperty('cuisine') !== true) {
+                                                    actions.say(sender, context, "What kind of recipe do you search for? What cuisine? For example: african, chinese, japanese, korean, vietnamese, thai, indian, british, irish, french, italian, mexican, spanish, middle eastern, jewish, american, cajun, southern, greek, german, nordic, eastern european, caribbean, or latin american.\"")
+                                                }
 
-                                            if (intent === "recipe" && messaging.message.nlp.entities.hasOwnProperty('cuisine') !== true) {
-                                                actions.say(sender, context, "What kind of recipe do you search for? What cuisine? For example: african, chinese, japanese, korean, vietnamese, thai, indian, british, irish, french, italian, mexican, spanish, middle eastern, jewish, american, cajun, southern, greek, german, nordic, eastern european, caribbean, or latin american.\"")
-                                            }
-
-                                            if (messaging.message.nlp.entities.hasOwnProperty('cuisine') === true) {
-                                                actions.foodAPIRecipeRequest(sender, context, msg);
-                                            } else {
-                                                console.log('has no cuisine!');
-                                            }
-
+                                                if (messaging.message.nlp.entities.hasOwnProperty('cuisine') === true) {
+                                                    actions.foodAPIRecipeRequest(sender, context, msg);
+                                                } else {
+                                                    console.log('has no cuisine!');
+                                                }
                                             // Based on the session state, you might want to reset the session.
                                             // This depends heavily on the business logic of your bot.
                                             // Example:

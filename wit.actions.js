@@ -62,7 +62,8 @@ module.exports = {
 
     /**** Add your own functions HERE ******/
 
-    'null': ({sessionId, context, text, entities}) => {
+    'null': (sessionId, context, text, entities) => {
+        console.log("NaN?:" + sessionId + JSON.stringify(context) + text + entities);
         return Promise.resolve();
     },
 
